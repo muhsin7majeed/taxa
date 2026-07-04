@@ -12,7 +12,7 @@ Phase 1 is repository foundation:
 - architecture decision records
 - setup notes
 
-The Flutter app has not been scaffolded yet because `flutter` is not currently available on PATH in this WSL environment.
+The Flutter app scaffold lives in `apps/mobile`.
 
 ## Repository Layout
 
@@ -92,13 +92,22 @@ PORT=3100 bun run dev
 
 ## Mobile App
 
-Once Flutter is installed in WSL:
+Run Flutter checks:
 
 ```sh
-flutter create --org app.taxa --project-name taxa_mobile apps/mobile
+cd apps/mobile
+flutter analyze
+flutter test
 ```
 
-After scaffolding, the mobile app should follow the architecture in `AGENTS.md`.
+Run the app:
+
+```sh
+cd apps/mobile
+flutter run
+```
+
+The mobile app should follow the architecture in `AGENTS.md`.
 
 ## Development Rules
 

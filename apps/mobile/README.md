@@ -1,11 +1,13 @@
 # Taxa Mobile
 
-Flutter scaffold pending.
+Flutter mobile app for Taxa.
 
-Expected scaffold command once Flutter is installed in WSL:
+## Development
 
 ```sh
-flutter create --org app.taxa --project-name taxa_mobile apps/mobile
+flutter analyze
+flutter test
+flutter run
 ```
 
-The mobile app should follow the standards in `../../AGENTS.md`.
+The app follows the standards in `../../AGENTS.md`.

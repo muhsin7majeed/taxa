@@ -18,7 +18,6 @@ coverage/
 # Flutter / Dart generated local files
 apps/mobile/.flutter-plugins
 apps/mobile/.flutter-plugins-dependencies
-apps/mobile/pubspec.lock
 
 # OS/editor noise
 .DS_Store
