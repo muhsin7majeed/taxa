@@ -1,1 +1,25 @@
 temp/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.dart_tool/
+.packages
+
+# Build outputs
+build/
+dist/
+coverage/
+
+# Flutter / Dart generated local files
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/pubspec.lock
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
