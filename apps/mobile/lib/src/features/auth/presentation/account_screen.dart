@@ -1,28 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/taxa_theme_controller.dart';
+import '../../../core/theme/taxa_theme_preset.dart';
 import '../../../core/widgets/feature_status_panel.dart';
+import '../../../core/widgets/taxa_info_tile.dart';
+import '../../../core/widgets/taxa_screen.dart';
+import '../../../core/widgets/taxa_section_header.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const [
-        FeatureStatusPanel(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSettings = ref.watch(taxaThemeControllerProvider);
+    final selectedPreset = TaxaThemePresets.byId(themeSettings.presetId);
+
+    return TaxaScreen(
+      children: [
+        const TaxaSectionHeader(
+          title: 'Account',
+          subtitle: 'Sync and personalization settings will live here.',
+        ),
+        const FeatureStatusPanel(
           icon: Icons.person_outline,
+          eyebrow: 'Local profile',
           title: 'Guest explorer',
           body: 'Account and sync controls will connect after auth lands.',
         ),
-        SizedBox(height: 16),
-        _AccountStatusTile(
+        TaxaSectionHeader(
+          title: 'Appearance',
+          subtitle:
+              '${selectedPreset.label} theme, ${_themeModeLabel(themeSettings.themeMode)} brightness',
+        ),
+        TaxaInfoTile(
+          icon: Icons.palette_outlined,
+          title: selectedPreset.label,
+          subtitle: selectedPreset.description,
+        ),
+        const TaxaSectionHeader(
+          title: 'Status',
+          subtitle: 'Current shell behavior before auth and sync land.',
+        ),
+        const TaxaInfoTile(
           icon: Icons.cloud_off_outlined,
           title: 'Offline mode',
           subtitle: 'Local progress remains available without the API.',
         ),
-        SizedBox(height: 8),
-        _AccountStatusTile(
+        const TaxaInfoTile(
           icon: Icons.lock_outline,
           title: 'Private by default',
           subtitle:
@@ -31,28 +56,12 @@ class AccountScreen extends StatelessWidget {
       ],
     );
   }
-}
 
-class _AccountStatusTile extends StatelessWidget {
-  const _AccountStatusTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ListTile(
-      leading: Icon(icon, color: colorScheme.primary),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      tileColor: colorScheme.surfaceContainerHighest,
-    );
+  static String _themeModeLabel(ThemeMode themeMode) {
+    return switch (themeMode) {
+      ThemeMode.system => 'system',
+      ThemeMode.light => 'light',
+      ThemeMode.dark => 'dark',
+    };
   }
 }

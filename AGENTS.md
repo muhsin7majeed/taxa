@@ -48,6 +48,16 @@ docs/
 - Use code generation deliberately: generated files are allowed, but domain logic must remain readable.
 - Add widget tests for important flows and unit tests for repositories, sync queues, classifiers, and confidence-threshold decisions.
 
+## Design System Standards
+
+- Treat `docs/design/theme-and-motion.md` as the source of truth for Taxa's field-guide visual direction and motion language.
+- Use the shared theme architecture in `lib/src/core/theme/` for colors, spacing, radii, and motion. Feature widgets must read from `ColorScheme`, Taxa `ThemeExtension` tokens, and context helpers instead of hardcoding product colors or animation timings.
+- Use and extend reusable primitives in `lib/src/core/widgets/` before creating feature-specific UI. Existing primitives include app screen scaffold, section header, status panel, info tile, metric tile, progress tile, capture action, and animated entrance.
+- Add new reusable widgets or theme tokens when a UI pattern appears in more than one screen, crosses feature boundaries, or carries product semantics such as discovery, rarity, capture, sync, or checklist progress.
+- Keep abstractions small and concrete. Do not create broad UI frameworks before repeated usage proves the shape, but avoid copy-pasting styled containers, tiles, cards, or animation code across features.
+- Motion must be purposeful, fast, and performance-safe. Prefer transform-based localized animations, respect reduced-motion settings, and avoid expensive opacity, clipping, intrinsic layout, and broad rebuild patterns in animated paths.
+- Add focused widget tests for new shared primitives, theme controllers, and theme tokens when they affect visible behavior or app-wide styling.
+
 Suggested Flutter feature folders:
 
 ```text
@@ -143,8 +153,10 @@ If a command cannot run in the current environment, document the reason in the f
 ## Agent Workflow
 
 - Read existing files before editing.
+- Before making product or source code changes, summarize the intended changes and wait for user confirmation. Documentation-only updates requested by the user may proceed directly.
 - Keep changes scoped to the requested task.
 - Prefer official docs and primary sources for current Flutter, Bun, Elysia, Drizzle, and ML tooling questions.
 - Surface tradeoffs early when a PRD assumption is risky.
 - Create ADRs for durable choices such as local database, sync protocol, model architecture, and auth strategy.
 - Do not commit unless the user explicitly asks.
+- When committing, use detailed commit messages that explain what changed, why it changed, and the verification that was run.

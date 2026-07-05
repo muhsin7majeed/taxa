@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Phase 1 repository foundation is scaffolded and Phase 2B mobile shell work is complete. The Flutter app now has a Riverpod bootstrap, Material 3 theme, feature-first `lib/src` structure, bottom navigation, and placeholder screens for Capture, Collection, Checklists, and Account.
+Phase 1 repository foundation, Phase 2B mobile shell work, and Phase 2C theme/motion/design foundation are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, and upgraded placeholder screens for Capture, Collection, Checklists, and Account.
 
-The next implementation focus is the camera capture vertical slice: integrate the camera plugin, request permissions, build live capture and confirmation screens, and preserve the no-gallery-upload rule.
+The next implementation focus is the remaining Milestone 2 data foundation: Drift local database bootstrap, fake taxonomy catalog seed, and feature folders for identification and sync. After that, continue the camera capture vertical slice.
 
 ## Research Notes And Recommendations
 
@@ -17,6 +17,8 @@ The next implementation focus is the camera capture vertical slice: integrate th
 - **Anti-cheat:** In-app camera only prevents casual gallery upload, but it does not prove the photo is live. For MVP, enforce no gallery path and capture metadata; later add heuristics such as capture timestamps, session nonce, and optional server-side anomaly checks.
 - **Backend:** Bun + Elysia + Drizzle + PostgreSQL is a sound lightweight sync stack. Keep sync idempotent and test conflict cases before adding app polish.
 - **Docker:** Use Docker Compose for backend dependencies immediately, especially PostgreSQL. Keep Flutter mobile development outside Docker because Android SDK, emulators, physical devices, and native debugging work better on the host. Add an API container after the backend exists, and add production Compose/VPS deployment files later.
+- **Theme direction:** Use a calm field-guide identity rather than a generic green app. The default theme should combine botanical greens, warm specimen-card neutrals, water/sky accents, and sparing discovery highlights. Keep theme colors expressed through Material 3 `ColorScheme` roles plus Taxa-specific `ThemeExtension` tokens so alternate themes can be added later.
+- **Motion direction:** Animation should explain state changes, not decorate screens. Navigation can be quiet; capture, classification, progress, and card unlock moments should have more intentional motion. Keep animations performance-safe, respect reduced-motion settings, and profile frame timing on emulator and physical devices.
 
 ## Milestone 0: Product And Architecture Decisions
 
@@ -51,6 +53,20 @@ The next implementation focus is the camera capture vertical slice: integrate th
 - [ ] Add feature folders for identification and sync.
 - [ ] Add fake data seed for taxonomy catalog and collection progress.
 - [x] Build bottom navigation or equivalent primary app structure: Capture, Collection, Checklists, Account.
+
+## Milestone 2C: Theme, Motion, And Design Foundation
+
+- [x] Create a short design brief for Taxa's eco-dex/field-guide visual direction.
+- [x] Define scalable theme architecture with named theme presets, light/dark variants, Riverpod theme selection state, and a persistence boundary for future settings storage.
+- [x] Add Taxa theme tokens with `ThemeExtension` for app-specific colors, spacing, radii, elevation, illustration/accent colors, and motion timings/curves.
+- [x] Build the default "Field Guide" theme with accessible Material 3 color roles, readable typography, and restrained surfaces that work on mobile.
+- [x] Keep the theme architecture ready for future user-selectable themes without hardcoding colors in feature widgets.
+- [x] Create reusable UI primitives: app screen scaffold, section header, status panel, metric tile, progress tile, info tile, and primary capture action.
+- [x] Define a motion language for navigation, capture readiness, classification processing, collection progress, and discovery card unlocks.
+- [x] Add reduced-motion handling and avoid animation patterns that rely on expensive opacity, clipping, intrinsic layout passes, or broad rebuilds.
+- [x] Upgrade placeholder Capture, Collection, Checklists, and Account screens to use the design system.
+- [x] Add widget tests for theme selection defaults, shell rendering, and key reusable components.
+- [x] Run `dart format`, `flutter analyze`, targeted `flutter test`, and a debug APK build after implementation.
 
 ## Milestone 3: Camera Capture Vertical Slice
 
@@ -140,6 +156,7 @@ The next implementation focus is the camera capture vertical slice: integrate th
 - [x] Add Docker Compose PostgreSQL for local backend development.
 - [x] Keep Flutter development host-native; do not containerize the mobile app.
 - [x] Replace default Flutter counter app with Taxa mobile shell.
+- [x] Build scalable theme, motion, and design foundation.
 - [ ] Implement local taxonomy catalog seed.
 - [ ] Build fake-classifier camera-to-discovery vertical slice.
 - [ ] Choose and integrate drift schema.

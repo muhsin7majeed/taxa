@@ -5,6 +5,7 @@ import '../../features/auth/presentation/account_screen.dart';
 import '../../features/camera_capture/presentation/capture_screen.dart';
 import '../../features/checklist/presentation/checklists_screen.dart';
 import '../../features/collection/presentation/collection_screen.dart';
+import '../../core/theme/taxa_theme_extensions.dart';
 import 'app_destination.dart';
 
 final selectedDestinationControllerProvider =
@@ -38,10 +39,27 @@ class TaxaShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final destination = ref.watch(selectedDestinationControllerProvider);
+    final motion = context.taxaMotion;
 
     return Scaffold(
       appBar: AppBar(title: Text(destination.label)),
-      body: IndexedStack(index: destination.index, children: _screens),
+      body: AnimatedSwitcher(
+        duration: context.taxaReduceMotion ? Duration.zero : motion.quick,
+        switchInCurve: motion.entranceCurve,
+        switchOutCurve: motion.progressCurve,
+        transitionBuilder: (child, animation) {
+          final offsetAnimation = Tween<Offset>(
+            begin: const Offset(0.03, 0),
+            end: Offset.zero,
+          ).animate(animation);
+
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+        child: KeyedSubtree(
+          key: ValueKey(destination),
+          child: _screens[destination.index],
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: destination.index,
         onDestinationSelected: ref

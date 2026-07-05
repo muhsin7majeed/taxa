@@ -12,6 +12,7 @@ void main() {
 
     expect(find.text('Ready for capture'), findsOneWidget);
     expect(find.byIcon(Icons.add), findsNothing);
+    expect(find.text('Camera module pending'), findsOneWidget);
 
     await tester.tap(find.text('Collection'));
     await tester.pumpAndSettle();

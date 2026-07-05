@@ -1,71 +1,47 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/taxa_capture_action.dart';
 import '../../../core/widgets/feature_status_panel.dart';
+import '../../../core/widgets/taxa_info_tile.dart';
+import '../../../core/widgets/taxa_screen.dart';
+import '../../../core/widgets/taxa_section_header.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const [
+    return const TaxaScreen(
+      children: [
+        TaxaSectionHeader(
+          title: 'Camera fieldwork',
+          subtitle: 'Discoveries start with a live in-app capture.',
+        ),
         FeatureStatusPanel(
           icon: Icons.photo_camera_outlined,
+          eyebrow: 'Capture gate',
           title: 'Ready for capture',
           body: 'Discoveries begin from the in-app camera flow only.',
-          action: _DisabledCaptureButton(),
+          action: TaxaCaptureAction(
+            label: 'Camera module pending',
+            subtitle: 'No gallery import or upload path is exposed here.',
+          ),
         ),
-        SizedBox(height: 16),
-        _CaptureRuleTile(
+        TaxaSectionHeader(
+          title: 'MVP rules',
+          subtitle: 'The shell keeps the anti-cheat boundary visible.',
+        ),
+        TaxaInfoTile(
           icon: Icons.no_photography_outlined,
           title: 'Gallery imports blocked',
           subtitle: 'The shell exposes no upload or picker entry point.',
         ),
-        SizedBox(height: 8),
-        _CaptureRuleTile(
+        TaxaInfoTile(
           icon: Icons.offline_bolt_outlined,
           title: 'Offline first',
           subtitle: 'Capture metadata will be written locally before sync.',
         ),
       ],
-    );
-  }
-}
-
-class _DisabledCaptureButton extends StatelessWidget {
-  const _DisabledCaptureButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton.icon(
-      onPressed: null,
-      icon: const Icon(Icons.camera_alt_outlined),
-      label: const Text('Start capture'),
-    );
-  }
-}
-
-class _CaptureRuleTile extends StatelessWidget {
-  const _CaptureRuleTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ListTile(
-      leading: Icon(icon, color: colorScheme.primary),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      tileColor: colorScheme.surfaceContainerHighest,
     );
   }
 }
