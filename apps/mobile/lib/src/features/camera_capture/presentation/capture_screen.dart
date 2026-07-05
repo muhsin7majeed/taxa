@@ -39,7 +39,7 @@ class CaptureScreen extends StatelessWidget {
         TaxaInfoTile(
           icon: Icons.offline_bolt_outlined,
           title: 'Offline first',
-          subtitle: 'Capture metadata will be written locally before sync.',
+          subtitle: 'Capture metadata will be written to SQLite first.',
         ),
       ],
     );

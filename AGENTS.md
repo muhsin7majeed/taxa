@@ -12,6 +12,9 @@ The current product source of truth is `temp/PRD.md`. Treat this file as plannin
 - Keep the code scalable, maintainable, readable, and reliable over cleverness.
 - Prefer explicit domain models, typed boundaries, and small feature modules.
 - Preserve offline-first behavior: local writes happen before sync writes.
+- Treat the mobile app and its local Drift/SQLite database as the MVP source of truth until the offline discovery loop is valuable.
+- Do not make backend, auth, PostgreSQL, Docker, or network availability a blocker for mobile MVP features unless the user explicitly moves scope to sync or cloud persistence.
+- Keep local data models sync-ready even while backend work is deferred: use stable UUIDs, local timestamps, version fields where useful, and avoid depending on server IDs for core app behavior.
 - Keep expensive work off the Flutter UI isolate.
 - Do not add gallery import paths for discoveries.
 - Do not introduce backend image classification. Classification is on-device for MVP.
@@ -81,6 +84,7 @@ lib/src/
 
 ## Backend Standards
 
+- Backend implementation is deferred until the offline mobile MVP loop works. Keep the existing scaffold, but do not expand backend/auth/sync work unless the user explicitly asks or the roadmap reaches the sync phase.
 - Use Bun, TypeScript, Elysia, Drizzle ORM, and PostgreSQL.
 - Keep API handlers thin: validate input, call services, return typed responses.
 - Use Drizzle migrations for all schema changes.

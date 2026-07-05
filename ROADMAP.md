@@ -2,20 +2,20 @@
 
 ## Current Status
 
-Phase 1 repository foundation, Phase 2B mobile shell work, and Phase 2C theme/motion/design foundation are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, and upgraded placeholder screens for Capture, Collection, Checklists, and Account.
+Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, and Phase 2D local-first data foundation are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, and upgraded placeholder screens backed by local data.
 
-The next implementation focus is the remaining Milestone 2 data foundation: Drift local database bootstrap, fake taxonomy catalog seed, and feature folders for identification and sync. After that, continue the camera capture vertical slice.
+The next implementation focus is the camera-to-identification vertical slice: live in-app camera capture, captured-image confirmation, fake classifier routing, local discovery persistence, and collection/checklist unlocks. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
 
 ## Research Notes And Recommendations
 
 - **Zed vs Android Studio:** Zed can be used to edit the project and run terminal commands from WSL2. Android Studio is still recommended for Android SDK installation, emulator/device management, Gradle tooling, and native debugging. iOS requires macOS/Xcode.
-- **Local database:** Prefer `drift`/SQLite for MVP over Isar. Drift is current, relational, migration-friendly, reactive, and matches the backend's relational model. Isar is fast, but its latest stable package is old enough that it adds maintenance risk for a new long-lived product.
+- **Local database:** Prefer `drift`/SQLite for MVP over Isar. Drift is current, relational, migration-friendly, reactive, and matches the backend's relational model. For now, the local database is the app source of truth, not just a cache.
 - **On-device ML:** `tflite_flutter` is appropriate, but delegate support is not magic "NPU everywhere." It supports NNAPI/GPU on Android and Metal/Core ML delegates on iOS, with device/model-specific behavior. Build a benchmark screen early.
 - **Model choice:** Use a classifier for the MVP flow, not object detection, because the UX confirms a single photo and returns one likely species. Consider YOLO classify or MobileNet/EfficientNet-style backbones after dataset constraints are known. Do not lock to YOLO11 without benchmarking current export/runtime behavior.
 - **Taxonomy scope:** Broad "all animals/insects/fish" is too large for MVP. Start with a curated local pack such as "Backyard Birds and Bugs" with known labels, local metadata, and validation images.
 - **Confidence threshold:** 65% should be configurable and validated. Store top-k predictions, raw confidence, model version, and threshold used for each attempt.
 - **Anti-cheat:** In-app camera only prevents casual gallery upload, but it does not prove the photo is live. For MVP, enforce no gallery path and capture metadata; later add heuristics such as capture timestamps, session nonce, and optional server-side anomaly checks.
-- **Backend:** Bun + Elysia + Drizzle + PostgreSQL is a sound lightweight sync stack. Keep sync idempotent and test conflict cases before adding app polish.
+- **Backend:** Bun + Elysia + Drizzle + PostgreSQL remains the intended future sync stack, but backend/auth/sync work is deferred until the offline mobile discovery loop is useful. Do not block mobile MVP work on API, PostgreSQL, account, or network availability.
 - **Docker:** Use Docker Compose for backend dependencies immediately, especially PostgreSQL. Keep Flutter mobile development outside Docker because Android SDK, emulators, physical devices, and native debugging work better on the host. Add an API container after the backend exists, and add production Compose/VPS deployment files later.
 - **Theme direction:** Use a calm field-guide identity rather than a generic green app. The default theme should combine botanical greens, warm specimen-card neutrals, water/sky accents, and sparing discovery highlights. Keep theme colors expressed through Material 3 `ColorScheme` roles plus Taxa-specific `ThemeExtension` tokens so alternate themes can be added later.
 - **Motion direction:** Animation should explain state changes, not decorate screens. Navigation can be quiet; capture, classification, progress, and card unlock moments should have more intentional motion. Keep animations performance-safe, respect reduced-motion settings, and profile frame timing on emulator and physical devices.
@@ -47,11 +47,11 @@ The next implementation focus is the remaining Milestone 2 data foundation: Drif
 
 - [x] Implement app theme, typography, navigation, and base placeholder states.
 - [x] Add Riverpod app bootstrap and dependency providers.
-- [ ] Add local database bootstrap with drift migrations.
-- [ ] Add base error/loading state widgets for async workflows.
+- [x] Add local database bootstrap with drift migrations.
+- [x] Add base error/loading state widgets for async workflows.
 - [x] Add feature folders for auth, camera capture, collection, and checklist.
 - [ ] Add feature folders for identification and sync.
-- [ ] Add fake data seed for taxonomy catalog and collection progress.
+- [x] Add fake data seed for taxonomy catalog and collection progress.
 - [x] Build bottom navigation or equivalent primary app structure: Capture, Collection, Checklists, Account.
 
 ## Milestone 2C: Theme, Motion, And Design Foundation
@@ -67,6 +67,16 @@ The next implementation focus is the remaining Milestone 2 data foundation: Drif
 - [x] Upgrade placeholder Capture, Collection, Checklists, and Account screens to use the design system.
 - [x] Add widget tests for theme selection defaults, shell rendering, and key reusable components.
 - [x] Run `dart format`, `flutter analyze`, targeted `flutter test`, and a debug APK build after implementation.
+
+## Milestone 2D: Local-First Data Foundation
+
+- [x] Add Drift dependencies and generated database bootstrap.
+- [x] Define sync-ready local IDs, timestamps, and version fields without requiring server IDs.
+- [x] Create local tables for taxonomy entries, checklist groups, discovery records, identification attempts, and capture attempts.
+- [x] Add repository/provider boundaries so features read/write through typed interfaces.
+- [x] Seed a narrow fake taxonomy catalog and checklist pack for early UI and flow work.
+- [x] Add focused unit tests for database migrations, seed loading, repository reads/writes, and checklist progress calculations.
+- [x] Keep backend, auth, cloud backup, and cross-device sync out of this phase.
 
 ## Milestone 3: Camera Capture Vertical Slice
 
@@ -99,7 +109,9 @@ The next implementation focus is the remaining Milestone 2 data foundation: Drif
 - [ ] Ensure all collection and checklist screens load offline from local DB.
 - [ ] Add unit tests for progress calculations and unlock idempotency.
 
-## Milestone 6: Authentication
+## Milestone 6: Authentication (Deferred Until Local MVP)
+
+Defer this milestone until the local camera-to-discovery loop, local collection, and checklist progress work offline.
 
 - [ ] Design username/password auth contract.
 - [ ] Implement backend users, password hashing, sessions/tokens, and migrations.
@@ -107,7 +119,9 @@ The next implementation focus is the remaining Milestone 2 data foundation: Drif
 - [ ] Add auth guards for sync endpoints.
 - [ ] Add backend tests for invalid credentials, duplicate usernames, token expiry, and authorization.
 
-## Milestone 7: Offline-First Sync
+## Milestone 7: Cloud Sync (Deferred Until Local MVP)
+
+Defer this milestone until local persistence is stable and users have meaningful discovery data to back up or sync between devices.
 
 - [ ] Define local outbox table for pending sync events.
 - [ ] Implement backend sync endpoint with idempotency keys.
@@ -157,13 +171,14 @@ The next implementation focus is the remaining Milestone 2 data foundation: Drif
 - [x] Keep Flutter development host-native; do not containerize the mobile app.
 - [x] Replace default Flutter counter app with Taxa mobile shell.
 - [x] Build scalable theme, motion, and design foundation.
-- [ ] Implement local taxonomy catalog seed.
+- [x] Choose and integrate drift schema.
+- [x] Implement local taxonomy catalog seed.
 - [ ] Build fake-classifier camera-to-discovery vertical slice.
-- [ ] Choose and integrate drift schema.
-- [ ] Implement username/password auth.
-- [ ] Implement local outbox and basic sync.
+- [ ] Persist discoveries and checklist progress locally.
 - [ ] Integrate first real TFLite model.
 - [ ] Benchmark on physical Android hardware.
+- [ ] Revisit username/password auth after the local MVP loop works.
+- [ ] Revisit cloud backup and cross-device sync after the local MVP loop works.
 
 ## Open Questions
 
