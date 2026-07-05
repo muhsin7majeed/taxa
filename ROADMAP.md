@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, and Phase 2D local-first data foundation are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, and upgraded placeholder screens backed by local data.
+Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, and Phase 2D local-first data foundation are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, and upgraded placeholder screens backed by local data. The first Milestone 3 camera capture slice is implemented with Flutter `camera`, platform camera permission metadata, a live in-app camera screen, captured-image preview, camera-only guardrails, and local capture-attempt persistence.
 
-The next implementation focus is the camera-to-identification vertical slice: live in-app camera capture, captured-image confirmation, fake classifier routing, local discovery persistence, and collection/checklist unlocks. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
+The next implementation focus is finishing Milestone 3 fakeable camera flow tests and emulator/physical-device validation, then moving into the camera-to-identification vertical slice: fake classifier routing, local discovery persistence, and collection/checklist unlocks. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
 
 ## Research Notes And Recommendations
 
@@ -80,12 +80,13 @@ The next implementation focus is the camera-to-identification vertical slice: li
 
 ## Milestone 3: Camera Capture Vertical Slice
 
-- [ ] Integrate Flutter `camera` plugin.
-- [ ] Request and handle camera permissions.
-- [ ] Build live camera screen with capture control.
-- [ ] Build captured-image preview screen with Retake and Confirm.
-- [ ] Ensure no gallery picker dependency or upload path exists.
-- [ ] Persist capture attempt metadata locally.
+- [x] Integrate Flutter `camera` plugin.
+- [x] Request and handle camera permissions.
+- [x] Build live camera screen with capture control.
+- [x] Build captured-image preview screen with Retake and Confirm.
+- [x] Ensure no gallery picker dependency or upload path exists.
+- [x] Persist capture attempt metadata locally.
+- [x] Add focused repository test for local capture attempt persistence.
 - [ ] Add tests for camera flow state transitions where plugin boundaries can be faked.
 
 ## Milestone 4: Identification Pipeline
