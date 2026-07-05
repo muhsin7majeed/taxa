@@ -2,7 +2,9 @@
 
 ## Current Status
 
-The repository currently contains planning material only. The MVP should begin with foundations, then an offline mobile vertical slice, then sync, then model hardening.
+Phase 1 repository foundation is scaffolded and Phase 2B mobile shell work is complete. The Flutter app now has a Riverpod bootstrap, Material 3 theme, feature-first `lib/src` structure, bottom navigation, and placeholder screens for Capture, Collection, Checklists, and Account.
+
+The next implementation focus is the camera capture vertical slice: integrate the camera plugin, request permissions, build live capture and confirmation screens, and preserve the no-gallery-upload rule.
 
 ## Research Notes And Recommendations
 
@@ -18,8 +20,8 @@ The repository currently contains planning material only. The MVP should begin w
 
 ## Milestone 0: Product And Architecture Decisions
 
-- [ ] Create ADR for monorepo layout and tooling.
-- [ ] Create ADR choosing `drift`/SQLite vs Isar.
+- [x] Create ADR for monorepo layout and tooling.
+- [x] Create ADR choosing `drift`/SQLite vs Isar.
 - [ ] Create ADR for sync model: client event log, versioned deltas, or last-write-wins records.
 - [ ] Create ADR for model format, label map, and taxonomy catalog versioning.
 - [ ] Define MVP taxonomy pack size and target geography.
@@ -27,25 +29,28 @@ The repository currently contains planning material only. The MVP should begin w
 
 ## Milestone 1: Repository Foundation
 
-- [ ] Scaffold monorepo directories: `apps/mobile`, `services/api`, `packages`, `ml`, and `docs`.
-- [ ] Scaffold Flutter app in `apps/mobile`.
-- [ ] Configure Flutter linting, formatting, and test conventions.
-- [ ] Scaffold Bun/Elysia API in `services/api`.
-- [ ] Configure backend linting, formatting, tests, and env loading.
-- [ ] Add Docker Compose for local PostgreSQL.
+- [x] Scaffold monorepo directories: `apps/mobile`, `services/api`, `packages`, `ml`, and `docs`.
+- [x] Scaffold Flutter app in `apps/mobile`.
+- [x] Configure Flutter linting, formatting, and test conventions.
+- [x] Scaffold Bun/Elysia API in `services/api`.
+- [x] Configure backend typecheck, tests, and env loading.
+- [ ] Add backend linting and formatting conventions.
+- [x] Add Docker Compose for local PostgreSQL.
 - [ ] Optionally add Adminer or pgAdmin for local database inspection.
-- [ ] Document that Flutter mobile development runs outside Docker.
-- [ ] Add root README with setup commands for WSL2, Android SDK, Flutter, Bun, and PostgreSQL.
+- [x] Document that Flutter mobile development runs outside Docker.
+- [x] Add root README with setup commands for WSL2, Android SDK, Flutter, Bun, and PostgreSQL.
 - [ ] Add CI workflow for Flutter analyze/tests and backend tests.
 
 ## Milestone 2: Mobile App Shell
 
-- [ ] Implement app theme, typography, navigation, and base error/loading states.
-- [ ] Add Riverpod app bootstrap and dependency providers.
+- [x] Implement app theme, typography, navigation, and base placeholder states.
+- [x] Add Riverpod app bootstrap and dependency providers.
 - [ ] Add local database bootstrap with drift migrations.
-- [ ] Add feature folders for auth, camera capture, identification, collection, checklist, and sync.
+- [ ] Add base error/loading state widgets for async workflows.
+- [x] Add feature folders for auth, camera capture, collection, and checklist.
+- [ ] Add feature folders for identification and sync.
 - [ ] Add fake data seed for taxonomy catalog and collection progress.
-- [ ] Build bottom navigation or equivalent primary app structure: Capture, Collection, Checklists, Account.
+- [x] Build bottom navigation or equivalent primary app structure: Capture, Collection, Checklists, Account.
 
 ## Milestone 3: Camera Capture Vertical Slice
 
@@ -130,10 +135,11 @@ The repository currently contains planning material only. The MVP should begin w
 
 ## Initial Task Backlog
 
-- [ ] Scaffold Flutter app under `apps/mobile`.
-- [ ] Scaffold Bun API under `services/api`.
-- [ ] Add Docker Compose PostgreSQL for local backend development.
-- [ ] Keep Flutter development host-native; do not containerize the mobile app.
+- [x] Scaffold Flutter app under `apps/mobile`.
+- [x] Scaffold Bun API under `services/api`.
+- [x] Add Docker Compose PostgreSQL for local backend development.
+- [x] Keep Flutter development host-native; do not containerize the mobile app.
+- [x] Replace default Flutter counter app with Taxa mobile shell.
 - [ ] Implement local taxonomy catalog seed.
 - [ ] Build fake-classifier camera-to-discovery vertical slice.
 - [ ] Choose and integrate drift schema.
