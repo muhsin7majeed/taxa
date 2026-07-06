@@ -123,7 +123,7 @@ class _FakeTfliteInterpreterHandle implements TfliteInterpreterHandle {
   }
 
   @override
-  void close() {
+  Future<void> close() async {
     closed = true;
   }
 }

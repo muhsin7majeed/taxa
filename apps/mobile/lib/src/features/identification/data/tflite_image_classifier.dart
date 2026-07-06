@@ -17,7 +17,7 @@ class TfliteImageClassifier implements ImageClassifier {
     ClassifierOutputDecoder? outputDecoder,
     TfliteInterpreterFactory? interpreterFactory,
   }) : labelMapLoader = labelMapLoader ?? AssetClassifierLabelMapLoader(),
-       preprocessor = preprocessor ?? const DartImagePreprocessor(),
+       preprocessor = preprocessor ?? const IsolateImagePreprocessor(),
        outputDecoder = outputDecoder ?? const ClassifierOutputDecoder(),
        interpreterFactory =
            interpreterFactory ?? const AssetTfliteInterpreterFactory();
@@ -50,7 +50,7 @@ class TfliteImageClassifier implements ImageClassifier {
         predictions: predictions,
       );
     } finally {
-      interpreter.close();
+      await interpreter.close();
     }
   }
 }
@@ -62,11 +62,13 @@ abstract interface class TfliteInterpreterFactory {
 abstract interface class TfliteInterpreterHandle {
   Future<List<double>> run(ModelInputTensor input);
 
-  void close();
+  Future<void> close();
 }
 
 class AssetTfliteInterpreterFactory implements TfliteInterpreterFactory {
-  const AssetTfliteInterpreterFactory();
+  const AssetTfliteInterpreterFactory({this.runInBackgroundIsolate = true});
+
+  final bool runInBackgroundIsolate;
 
   @override
   Future<TfliteInterpreterHandle> load(ClassifierModelConfig config) async {
@@ -76,7 +78,11 @@ class AssetTfliteInterpreterFactory implements TfliteInterpreterFactory {
       options: options,
     );
 
-    return _TfliteInterpreterHandle(interpreter);
+    if (!runInBackgroundIsolate) {
+      return _InlineTfliteInterpreterHandle(interpreter);
+    }
+
+    return _IsolateTfliteInterpreterHandle.create(interpreter);
   }
 
   tfl.InterpreterOptions _buildOptions(ClassifierModelConfig config) {
@@ -99,28 +105,80 @@ class AssetTfliteInterpreterFactory implements TfliteInterpreterFactory {
   }
 }
 
-class _TfliteInterpreterHandle implements TfliteInterpreterHandle {
-  const _TfliteInterpreterHandle(this._interpreter);
+class _InlineTfliteInterpreterHandle implements TfliteInterpreterHandle {
+  const _InlineTfliteInterpreterHandle(this._interpreter);
 
   final tfl.Interpreter _interpreter;
 
   @override
   Future<List<double>> run(ModelInputTensor input) async {
-    final outputShape = _interpreter.getOutputTensor(0).shape;
-    final outputLength = outputShape.isEmpty ? 0 : outputShape.last;
-
-    if (outputLength <= 0) {
-      throw StateError('TFLite classifier output tensor is empty.');
-    }
-
-    final output = [List<double>.filled(outputLength, 0)];
+    final output = _createOutputBuffer(_interpreter);
     _interpreter.run(input.toBatchedTensor(), output);
 
     return output.single;
   }
 
   @override
-  void close() {
+  Future<void> close() async {
     _interpreter.close();
   }
+}
+
+class _IsolateTfliteInterpreterHandle implements TfliteInterpreterHandle {
+  const _IsolateTfliteInterpreterHandle({
+    required tfl.Interpreter interpreter,
+    required tfl.IsolateInterpreter isolateInterpreter,
+  }) : this._(interpreter, isolateInterpreter);
+
+  const _IsolateTfliteInterpreterHandle._(
+    this._interpreter,
+    this._isolateInterpreter,
+  );
+
+  final tfl.Interpreter _interpreter;
+  final tfl.IsolateInterpreter _isolateInterpreter;
+
+  static Future<_IsolateTfliteInterpreterHandle> create(
+    tfl.Interpreter interpreter,
+  ) async {
+    try {
+      final isolateInterpreter = await tfl.IsolateInterpreter.create(
+        address: interpreter.address,
+        debugName: 'TaxaTfliteClassifier',
+      );
+
+      return _IsolateTfliteInterpreterHandle(
+        interpreter: interpreter,
+        isolateInterpreter: isolateInterpreter,
+      );
+    } on Object {
+      interpreter.close();
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<double>> run(ModelInputTensor input) async {
+    final output = _createOutputBuffer(_interpreter);
+    await _isolateInterpreter.run(input.toBatchedTensor(), output);
+
+    return output.single;
+  }
+
+  @override
+  Future<void> close() async {
+    await _isolateInterpreter.close();
+    _interpreter.close();
+  }
+}
+
+List<List<double>> _createOutputBuffer(tfl.Interpreter interpreter) {
+  final outputShape = interpreter.getOutputTensor(0).shape;
+  final outputLength = outputShape.isEmpty ? 0 : outputShape.last;
+
+  if (outputLength <= 0) {
+    throw StateError('TFLite classifier output tensor is empty.');
+  }
+
+  return [List<double>.filled(outputLength, 0)];
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as image;
@@ -86,5 +87,22 @@ class DartImagePreprocessor implements ImagePreprocessor {
 
   bool _canPreprocess(ModelInputSpec spec) {
     return spec.isValid && spec.width == spec.height && spec.channels == 3;
+  }
+}
+
+class IsolateImagePreprocessor implements ImagePreprocessor {
+  const IsolateImagePreprocessor();
+
+  @override
+  Future<ModelInputTensor> preprocessFile({
+    required String imagePath,
+    required ModelInputSpec spec,
+  }) {
+    return Isolate.run(() {
+      return const DartImagePreprocessor().preprocessFile(
+        imagePath: imagePath,
+        spec: spec,
+      );
+    });
   }
 }

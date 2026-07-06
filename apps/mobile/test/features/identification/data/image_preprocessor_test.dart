@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -51,5 +52,30 @@ void main() {
       ),
       throwsArgumentError,
     );
+  });
+
+  test('preprocesses files in a background isolate', () async {
+    const preprocessor = IsolateImagePreprocessor();
+    final tempDir = await Directory.systemTemp.createTemp(
+      'taxa_image_preprocessor_test',
+    );
+    final imageFile = File('${tempDir.path}/capture.png');
+    final source = image.Image(width: 1, height: 1)
+      ..setPixelRgb(0, 0, 128, 64, 32);
+    await imageFile.writeAsBytes(image.encodePng(source));
+
+    try {
+      final tensor = await preprocessor.preprocessFile(
+        imagePath: imageFile.path,
+        spec: ModelInputSpec.squareRgb(1),
+      );
+
+      expect(tensor.hasExpectedLength, isTrue);
+      expect(tensor.values[0], closeTo(128 / 255, 0.001));
+      expect(tensor.values[1], closeTo(64 / 255, 0.001));
+      expect(tensor.values[2], closeTo(32 / 255, 0.001));
+    } finally {
+      await tempDir.delete(recursive: true);
+    }
   });
 }
