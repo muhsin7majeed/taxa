@@ -8,7 +8,10 @@ import '../../../core/widgets/taxa_info_tile.dart';
 import '../../../core/widgets/taxa_metric_tile.dart';
 import '../../../core/widgets/taxa_screen.dart';
 import '../../../core/widgets/taxa_section_header.dart';
+import '../data/classifier_compatibility_validator.dart';
 import '../data/identification_providers.dart';
+import '../data/tflite_classifier_providers.dart';
+import '../data/tflite_classifier_readiness_checker.dart';
 import '../domain/classifier_benchmark.dart';
 import '../domain/classifier_model_config.dart';
 
@@ -19,6 +22,7 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(classifierModelConfigProvider);
     final benchmark = ref.watch(classifierBenchmarkProvider);
+    final tfliteReadiness = ref.watch(tfliteClassifierReadinessProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Classifier Diagnostics')),
@@ -26,14 +30,14 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
         children: [
           const TaxaSectionHeader(
             title: 'Classifier diagnostics',
-            subtitle: 'Local runtime metadata and benchmark timing.',
+            subtitle: 'Fake runtime timing and real-model readiness checks.',
           ),
           FeatureStatusPanel(
             icon: Icons.memory_outlined,
-            eyebrow: 'Active classifier',
-            title: config.modelVersion,
+            eyebrow: 'Capture flow',
+            title: 'Fake classifier active',
             body:
-                'Fake classifier remains active until a real model asset is available.',
+                'Capture still uses deterministic local predictions until the bundled TFLite model passes readiness checks on Android.',
             action: switch (benchmark) {
               AsyncLoading() => FilledButton.icon(
                 onPressed: null,
@@ -46,7 +50,7 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
               _ => FilledButton.icon(
                 onPressed: () => ref.invalidate(classifierBenchmarkProvider),
                 icon: const Icon(Icons.speed_outlined),
-                label: const Text('Run benchmark'),
+                label: const Text('Run fake benchmark'),
               ),
             },
           ),
@@ -71,7 +75,7 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
           ),
           const TaxaInfoTile(
             icon: Icons.info_outline,
-            title: 'Current benchmark uses fake classifier',
+            title: 'Fake benchmark',
             subtitle:
                 'The timing below measures simulated analysis latency, not real TFLite inference yet.',
           ),
@@ -88,15 +92,19 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
           switch (benchmark) {
             AsyncData(:final value) => _BenchmarkSummaryPanel(summary: value),
             AsyncError() => const TaxaAsyncStatePanel.error(
-              title: 'Benchmark unavailable',
+              title: 'Fake benchmark unavailable',
               body:
                   'The active classifier could not complete a local benchmark run.',
             ),
             _ => const TaxaAsyncStatePanel.loading(
-              title: 'Benchmark running',
+              title: 'Fake benchmark running',
               body: 'Timing the active local classifier.',
             ),
           },
+          _TfliteReadinessPanel(
+            readiness: tfliteReadiness,
+            onRefresh: () => ref.invalidate(tfliteClassifierReadinessProvider),
+          ),
         ],
       ),
     );
@@ -112,6 +120,105 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
 
   String _formatPercent(double value) {
     return '${(value * 100).round()}%';
+  }
+}
+
+class _TfliteReadinessPanel extends StatelessWidget {
+  const _TfliteReadinessPanel({
+    required this.readiness,
+    required this.onRefresh,
+  });
+
+  final AsyncValue<TfliteClassifierReadiness> readiness;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.taxaSpacing;
+
+    return switch (readiness) {
+      AsyncData(:final value) => Column(
+        children: [
+          FeatureStatusPanel(
+            icon: Icons.integration_instructions_outlined,
+            eyebrow: 'TFLite readiness',
+            title: 'Model path is compatible',
+            body:
+                '${value.modelVersion} matches ${value.labelCount} labels and expected tensor shapes.',
+            action: OutlinedButton.icon(
+              onPressed: onRefresh,
+              icon: const Icon(Icons.refresh_outlined),
+              label: const Text('Run TFLite check'),
+            ),
+          ),
+          SizedBox(height: spacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: TaxaMetricTile(
+                  label: 'Input',
+                  value: value.inputShapeLabel,
+                  icon: Icons.input_outlined,
+                ),
+              ),
+              SizedBox(width: spacing.md),
+              Expanded(
+                child: TaxaMetricTile(
+                  label: 'Output',
+                  value: value.outputShapeLabel,
+                  icon: Icons.output_outlined,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.md),
+          TaxaInfoTile(
+            icon: Icons.label_outline,
+            title: value.labelMapVersion,
+            subtitle: '${value.labelCount} classifier labels are available.',
+          ),
+        ],
+      ),
+      AsyncError(:final error) => FeatureStatusPanel(
+        icon: Icons.warning_amber_outlined,
+        eyebrow: 'TFLite readiness',
+        title: 'Model path not ready',
+        body: _formatDiagnosticError(error),
+        action: OutlinedButton.icon(
+          onPressed: onRefresh,
+          icon: const Icon(Icons.refresh_outlined),
+          label: const Text('Run TFLite check'),
+        ),
+      ),
+      _ => FeatureStatusPanel(
+        icon: Icons.hourglass_empty_outlined,
+        eyebrow: 'TFLite readiness',
+        title: 'Checking model path',
+        body:
+            'Loading labels and checking whether the real TFLite model asset can be opened.',
+        action: OutlinedButton.icon(
+          onPressed: null,
+          icon: SizedBox.square(
+            dimension: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          label: Text('Checking'),
+        ),
+      ),
+    };
+  }
+
+  String _formatDiagnosticError(Object error) {
+    if (error is ClassifierCompatibilityException) {
+      return error.message;
+    }
+
+    final message = error.toString();
+    if (message.contains('Unable to load asset')) {
+      return 'The configured TFLite model asset is not bundled yet.';
+    }
+
+    return message;
   }
 }
 

@@ -5,6 +5,7 @@ import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
 import '../domain/classifier_model_config.dart';
 import '../domain/image_classifier.dart';
 import '../domain/model_input.dart';
+import 'classifier_compatibility_validator.dart';
 import 'classifier_label_map_loader.dart';
 import 'classifier_output_decoder.dart';
 import 'image_preprocessor.dart';
@@ -13,10 +14,13 @@ class TfliteImageClassifier implements ImageClassifier {
   TfliteImageClassifier({
     required this.config,
     ClassifierLabelMapLoader? labelMapLoader,
+    ClassifierCompatibilityValidator? compatibilityValidator,
     ImagePreprocessor? preprocessor,
     ClassifierOutputDecoder? outputDecoder,
     TfliteInterpreterFactory? interpreterFactory,
   }) : labelMapLoader = labelMapLoader ?? AssetClassifierLabelMapLoader(),
+       compatibilityValidator =
+           compatibilityValidator ?? const ClassifierCompatibilityValidator(),
        preprocessor = preprocessor ?? const IsolateImagePreprocessor(),
        outputDecoder = outputDecoder ?? const ClassifierOutputDecoder(),
        interpreterFactory =
@@ -24,6 +28,7 @@ class TfliteImageClassifier implements ImageClassifier {
 
   final ClassifierModelConfig config;
   final ClassifierLabelMapLoader labelMapLoader;
+  final ClassifierCompatibilityValidator compatibilityValidator;
   final ImagePreprocessor preprocessor;
   final ClassifierOutputDecoder outputDecoder;
   final TfliteInterpreterFactory interpreterFactory;
@@ -31,6 +36,7 @@ class TfliteImageClassifier implements ImageClassifier {
   @override
   Future<ImageClassification> classifyImage({required String imagePath}) async {
     final labelMap = await labelMapLoader.load(config.labelMapAssetPath);
+    compatibilityValidator.validateLabelMap(config: config, labelMap: labelMap);
     final input = await preprocessor.preprocessFile(
       imagePath: imagePath,
       spec: ModelInputSpec.squareRgb(config.inputSize),
@@ -38,6 +44,11 @@ class TfliteImageClassifier implements ImageClassifier {
     final interpreter = await interpreterFactory.load(config);
 
     try {
+      compatibilityValidator.validateRuntime(
+        config: config,
+        labelMap: labelMap,
+        metadata: interpreter.metadata,
+      );
       final scores = await interpreter.run(input);
       final predictions = outputDecoder.decodeTopK(
         scores: scores,
@@ -60,6 +71,8 @@ abstract interface class TfliteInterpreterFactory {
 }
 
 abstract interface class TfliteInterpreterHandle {
+  ClassifierRuntimeMetadata get metadata;
+
   Future<List<double>> run(ModelInputTensor input);
 
   Future<void> close();
@@ -111,6 +124,9 @@ class _InlineTfliteInterpreterHandle implements TfliteInterpreterHandle {
   final tfl.Interpreter _interpreter;
 
   @override
+  ClassifierRuntimeMetadata get metadata => _readRuntimeMetadata(_interpreter);
+
+  @override
   Future<List<double>> run(ModelInputTensor input) async {
     final output = _createOutputBuffer(_interpreter);
     _interpreter.run(input.toBatchedTensor(), output);
@@ -137,6 +153,9 @@ class _IsolateTfliteInterpreterHandle implements TfliteInterpreterHandle {
 
   final tfl.Interpreter _interpreter;
   final tfl.IsolateInterpreter _isolateInterpreter;
+
+  @override
+  ClassifierRuntimeMetadata get metadata => _readRuntimeMetadata(_interpreter);
 
   static Future<_IsolateTfliteInterpreterHandle> create(
     tfl.Interpreter interpreter,
@@ -181,4 +200,11 @@ List<List<double>> _createOutputBuffer(tfl.Interpreter interpreter) {
   }
 
   return [List<double>.filled(outputLength, 0)];
+}
+
+ClassifierRuntimeMetadata _readRuntimeMetadata(tfl.Interpreter interpreter) {
+  return ClassifierRuntimeMetadata(
+    inputShape: [...interpreter.getInputTensor(0).shape],
+    outputShape: [...interpreter.getOutputTensor(0).shape],
+  );
 }

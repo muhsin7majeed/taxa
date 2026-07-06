@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:taxa_mobile/src/core/storage/seed/taxa_seed_data.dart';
 import 'package:taxa_mobile/src/features/identification/data/classifier_compatibility_validator.dart';
 import 'package:taxa_mobile/src/features/identification/data/classifier_label_map_loader.dart';
-import 'package:taxa_mobile/src/features/identification/data/image_preprocessor.dart';
+import 'package:taxa_mobile/src/features/identification/data/tflite_classifier_readiness_checker.dart';
 import 'package:taxa_mobile/src/features/identification/data/tflite_image_classifier.dart';
 import 'package:taxa_mobile/src/features/identification/domain/classifier_label_map.dart';
 import 'package:taxa_mobile/src/features/identification/domain/classifier_model_config.dart';
@@ -37,32 +37,48 @@ void main() {
     ],
   );
 
-  test(
-    'preprocesses image, runs interpreter, and decodes top predictions',
-    () async {
-      final preprocessor = _FakeImagePreprocessor();
-      final handle = _FakeTfliteInterpreterHandle(scores: [0.2, 0.8]);
-      final classifier = TfliteImageClassifier(
-        config: config,
-        labelMapLoader: const _FakeLabelMapLoader(labelMap),
-        preprocessor: preprocessor,
-        interpreterFactory: _FakeTfliteInterpreterFactory(handle),
-      );
+  test('returns readiness metadata for compatible model and labels', () async {
+    final handle = _FakeTfliteInterpreterHandle(
+      metadata: const ClassifierRuntimeMetadata(
+        inputShape: [1, 2, 2, 3],
+        outputShape: [1, 2],
+      ),
+    );
+    final checker = TfliteClassifierReadinessChecker(
+      config: config,
+      labelMapLoader: const _FakeLabelMapLoader(labelMap),
+      interpreterFactory: _FakeTfliteInterpreterFactory(handle),
+    );
 
-      final classification = await classifier.classifyImage(
-        imagePath: 'captures/test.jpg',
-      );
+    final readiness = await checker.check();
 
-      expect(preprocessor.seenImagePath, 'captures/test.jpg');
-      expect(preprocessor.seenSpec?.width, 2);
-      expect(handle.seenInput, same(preprocessor.tensor));
-      expect(handle.closed, isTrue);
-      expect(classification.modelVersion, 'test-model-v1');
-      expect(classification.labelMapVersion, 'test-labels-v1');
-      expect(classification.topPrediction?.commonName, 'Monarch Butterfly');
-      expect(classification.topPrediction?.confidence, 0.8);
-    },
-  );
+    expect(readiness.modelVersion, 'test-model-v1');
+    expect(readiness.labelMapVersion, 'test-labels-v1');
+    expect(readiness.labelCount, 2);
+    expect(readiness.inputShapeLabel, '1x2x2x3');
+    expect(readiness.outputShapeLabel, '1x2');
+    expect(handle.closed, isTrue);
+  });
+
+  test('closes interpreter when runtime validation fails', () async {
+    final handle = _FakeTfliteInterpreterHandle(
+      metadata: const ClassifierRuntimeMetadata(
+        inputShape: [1, 2, 2, 3],
+        outputShape: [1, 3],
+      ),
+    );
+    final checker = TfliteClassifierReadinessChecker(
+      config: config,
+      labelMapLoader: const _FakeLabelMapLoader(labelMap),
+      interpreterFactory: _FakeTfliteInterpreterFactory(handle),
+    );
+
+    await expectLater(
+      checker.check(),
+      throwsA(isA<ClassifierCompatibilityException>()),
+    );
+    expect(handle.closed, isTrue);
+  });
 }
 
 class _FakeLabelMapLoader implements ClassifierLabelMapLoader {
@@ -73,27 +89,6 @@ class _FakeLabelMapLoader implements ClassifierLabelMapLoader {
   @override
   Future<ClassifierLabelMap> load(String assetPath) async {
     return labelMap;
-  }
-}
-
-class _FakeImagePreprocessor implements ImagePreprocessor {
-  final tensor = ModelInputTensor(
-    spec: ModelInputSpec.squareRgb(2),
-    values: List.filled(12, 0.5),
-  );
-
-  String? seenImagePath;
-  ModelInputSpec? seenSpec;
-
-  @override
-  Future<ModelInputTensor> preprocessFile({
-    required String imagePath,
-    required ModelInputSpec spec,
-  }) async {
-    seenImagePath = imagePath;
-    seenSpec = spec;
-
-    return tensor;
   }
 }
 
@@ -109,24 +104,16 @@ class _FakeTfliteInterpreterFactory implements TfliteInterpreterFactory {
 }
 
 class _FakeTfliteInterpreterHandle implements TfliteInterpreterHandle {
-  _FakeTfliteInterpreterHandle({required this.scores});
-
-  final List<double> scores;
+  _FakeTfliteInterpreterHandle({required this.metadata});
 
   @override
-  final metadata = const ClassifierRuntimeMetadata(
-    inputShape: [1, 2, 2, 3],
-    outputShape: [1, 2],
-  );
+  final ClassifierRuntimeMetadata metadata;
 
-  ModelInputTensor? seenInput;
   var closed = false;
 
   @override
   Future<List<double>> run(ModelInputTensor input) async {
-    seenInput = input;
-
-    return scores;
+    return const [];
   }
 
   @override
