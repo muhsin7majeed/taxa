@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../collection/data/local_catalog_providers.dart';
+import 'classifier_benchmark_runner.dart';
 import '../domain/classifier_model_config.dart';
 import '../domain/identification_decision.dart';
 import '../domain/image_classifier.dart';
@@ -39,4 +40,17 @@ final identificationWorkflowProvider = Provider<IdentificationWorkflow>((ref) {
     attemptRepository: ref.watch(identificationAttemptRepositoryProvider),
     catalogRepository: ref.watch(localCatalogRepositoryProvider),
   );
+});
+
+final classifierBenchmarkRunnerProvider = Provider<ClassifierBenchmarkRunner>((
+  ref,
+) {
+  return ClassifierBenchmarkRunner(
+    classifier: ref.watch(imageClassifierProvider),
+    config: ref.watch(classifierModelConfigProvider),
+  );
+});
+
+final classifierBenchmarkProvider = FutureProvider.autoDispose((ref) {
+  return ref.watch(classifierBenchmarkRunnerProvider).run();
 });

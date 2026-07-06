@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, Phase 2D local-first data foundation, and Milestone 3 camera capture vertical slice are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, upgraded placeholder screens backed by local data, a live in-app camera screen, captured-image preview, camera-only guardrails, local capture-attempt persistence, the first fake-classifier identification slice, typed model asset configuration, a bundled label-map asset, and a TFLite classifier scaffold for the future on-device classifier.
+Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, Phase 2D local-first data foundation, and Milestone 3 camera capture vertical slice are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, upgraded placeholder screens backed by local data, a live in-app camera screen, captured-image preview, camera-only guardrails, local capture-attempt persistence, the first fake-classifier identification slice, typed model asset configuration, a bundled label-map asset, a TFLite classifier scaffold, and local classifier diagnostics.
 
-The next implementation focus is extending Milestone 4 from TFLite scaffolding toward real on-device inference: tensor preprocessing/output decoding, isolate-backed inference, benchmark tooling, and physical Android validation. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
+The next implementation focus is extending Milestone 4 from TFLite scaffolding toward real on-device inference: tensor preprocessing/output decoding, isolate-backed inference, and physical Android validation. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
 
 ## Research Notes And Recommendations
 
@@ -99,7 +99,7 @@ The next implementation focus is extending Milestone 4 from TFLite scaffolding t
 - [x] Add `tflite_flutter`, label-map asset parsing, and a non-default TFLite classifier scaffold.
 - [ ] Add real `tflite_flutter` classifier behind the interface.
 - [ ] Move preprocessing/inference off the UI isolate.
-- [ ] Add a local benchmark/debug screen for latency and delegate behavior.
+- [x] Add a local benchmark/debug screen for latency and delegate behavior.
 - [ ] Validate on at least one physical Android device.
 
 ## Milestone 5: Collection And Checklist

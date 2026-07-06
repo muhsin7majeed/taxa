@@ -71,6 +71,7 @@ void main() {
     await tester.tap(find.text('Account'));
     await pumpUntilFound(tester, find.text('Guest explorer'));
     expect(find.text('Guest explorer'), findsOneWidget);
+    expect(find.text('Classifier diagnostics'), findsWidgets);
   });
 }
 

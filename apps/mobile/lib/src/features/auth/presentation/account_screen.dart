@@ -7,6 +7,7 @@ import '../../../core/widgets/feature_status_panel.dart';
 import '../../../core/widgets/taxa_info_tile.dart';
 import '../../../core/widgets/taxa_screen.dart';
 import '../../../core/widgets/taxa_section_header.dart';
+import '../../identification/presentation/classifier_diagnostics_screen.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -37,6 +38,28 @@ class AccountScreen extends ConsumerWidget {
           icon: Icons.palette_outlined,
           title: selectedPreset.label,
           subtitle: selectedPreset.description,
+        ),
+        const TaxaSectionHeader(
+          title: 'Diagnostics',
+          subtitle: 'Local classifier readiness and timing.',
+        ),
+        FeatureStatusPanel(
+          icon: Icons.memory_outlined,
+          eyebrow: 'On-device ML',
+          title: 'Classifier diagnostics',
+          body:
+              'Inspect local model metadata and benchmark the active classifier.',
+          action: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ClassifierDiagnosticsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.speed_outlined),
+            label: const Text('Open'),
+          ),
         ),
         const TaxaSectionHeader(
           title: 'Status',
