@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, Phase 2D local-first data foundation, and Milestone 3 camera capture vertical slice are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, upgraded placeholder screens backed by local data, a live in-app camera screen, captured-image preview, camera-only guardrails, and local capture-attempt persistence.
+Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, Phase 2D local-first data foundation, and Milestone 3 camera capture vertical slice are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, upgraded placeholder screens backed by local data, a live in-app camera screen, captured-image preview, camera-only guardrails, local capture-attempt persistence, and the first fake-classifier identification slice.
 
-The next implementation focus is Milestone 4: the camera-to-identification vertical slice with fake classifier routing, local discovery persistence, and collection/checklist unlocks. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
+The next implementation focus is extending Milestone 4 from the fake classifier slice toward the real on-device model boundary: TFLite integration behind `ImageClassifier`, isolate-backed preprocessing/inference, benchmark tooling, and physical Android validation. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
 
 ## Research Notes And Recommendations
 
@@ -49,8 +49,8 @@ The next implementation focus is Milestone 4: the camera-to-identification verti
 - [x] Add Riverpod app bootstrap and dependency providers.
 - [x] Add local database bootstrap with drift migrations.
 - [x] Add base error/loading state widgets for async workflows.
-- [x] Add feature folders for auth, camera capture, collection, and checklist.
-- [ ] Add feature folders for identification and sync.
+- [x] Add feature folders for auth, camera capture, collection, checklist, and identification.
+- [ ] Add feature folder for sync.
 - [x] Add fake data seed for taxonomy catalog and collection progress.
 - [x] Build bottom navigation or equivalent primary app structure: Capture, Collection, Checklists, Account.
 
@@ -91,10 +91,10 @@ The next implementation focus is Milestone 4: the camera-to-identification verti
 
 ## Milestone 4: Identification Pipeline
 
-- [ ] Define `ImageClassifier` interface and fake classifier implementation.
-- [ ] Build processing/loading screen with cancellable workflow.
-- [ ] Implement confidence-threshold routing: discovery success vs unidentified.
-- [ ] Store identification attempt, model version, top-k predictions, and result state.
+- [x] Define `ImageClassifier` interface and fake classifier implementation.
+- [x] Build processing/loading screen with cancellable workflow.
+- [x] Implement confidence-threshold routing: discovery success vs unidentified.
+- [x] Store identification attempt, model version, top-k predictions, and result state.
 - [ ] Add real `tflite_flutter` classifier behind the interface.
 - [ ] Move preprocessing/inference off the UI isolate.
 - [ ] Add a local benchmark/debug screen for latency and delegate behavior.
@@ -174,8 +174,8 @@ Defer this milestone until local persistence is stable and users have meaningful
 - [x] Build scalable theme, motion, and design foundation.
 - [x] Choose and integrate drift schema.
 - [x] Implement local taxonomy catalog seed.
-- [ ] Build fake-classifier camera-to-discovery vertical slice.
-- [ ] Persist discoveries and checklist progress locally.
+- [x] Build fake-classifier camera-to-discovery vertical slice.
+- [x] Persist discoveries and checklist progress locally.
 - [ ] Integrate first real TFLite model.
 - [ ] Benchmark on physical Android hardware.
 - [ ] Revisit username/password auth after the local MVP loop works.

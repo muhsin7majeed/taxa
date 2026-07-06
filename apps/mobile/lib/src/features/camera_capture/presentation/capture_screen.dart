@@ -13,8 +13,12 @@ import '../../../core/widgets/taxa_section_header.dart';
 import '../data/camera_capture_service.dart';
 import '../data/capture_attempt_providers.dart';
 import '../domain/pending_camera_capture.dart';
+import '../../identification/data/identification_providers.dart';
+import '../../identification/domain/identification_outcome.dart';
+import '../../identification/presentation/identification_processing_screen.dart';
+import '../../identification/presentation/identification_result_screen.dart';
 
-enum _CaptureMode { overview, liveCamera, preview }
+enum _CaptureMode { overview, liveCamera, preview, identifying, result }
 
 class CaptureScreen extends ConsumerStatefulWidget {
   const CaptureScreen({super.key});
@@ -27,7 +31,10 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   _CaptureMode _mode = _CaptureMode.overview;
   PendingCameraCapture? _pendingCapture;
   String? _lastSavedCaptureId;
+  PersistedIdentificationOutcome? _identificationOutcome;
+  Object? _identificationError;
   bool _isConfirming = false;
+  int _identificationRunId = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +68,15 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
         },
         onConfirm: _confirmCapture,
       ),
+      _CaptureMode.identifying => IdentificationProcessingScreen(
+        onCancel: _cancelIdentification,
+      ),
+      _CaptureMode.result => IdentificationResultScreen(
+        outcome: _identificationOutcome,
+        error: _identificationError,
+        onCaptureAgain: _startCapture,
+        onBackToOverview: _returnToOverview,
+      ),
     };
   }
 
@@ -85,17 +101,46 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
             capturedAt: capture.capturedAt,
             metadataJson: capture.metadataJson,
           );
+      final runId = _identificationRunId + 1;
 
       if (!mounted) {
         return;
       }
 
       setState(() {
+        _identificationRunId = runId;
         _lastSavedCaptureId = attempt.id;
         _pendingCapture = null;
         _isConfirming = false;
-        _mode = _CaptureMode.overview;
+        _identificationOutcome = null;
+        _identificationError = null;
+        _mode = _CaptureMode.identifying;
       });
+
+      try {
+        final outcome = await ref
+            .read(identificationWorkflowProvider)
+            .identifyCapture(attempt);
+        if (!mounted || runId != _identificationRunId) {
+          return;
+        }
+
+        setState(() {
+          _identificationOutcome = outcome;
+          _identificationError = null;
+          _mode = _CaptureMode.result;
+        });
+      } catch (error) {
+        if (!mounted || runId != _identificationRunId) {
+          return;
+        }
+
+        setState(() {
+          _identificationOutcome = null;
+          _identificationError = error;
+          _mode = _CaptureMode.result;
+        });
+      }
     } catch (_) {
       if (!mounted) {
         return;
@@ -111,9 +156,33 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     }
   }
 
-  void _returnToOverview() {
+  void _startCapture() {
+    _identificationRunId += 1;
+    setState(() {
+      _lastSavedCaptureId = null;
+      _pendingCapture = null;
+      _identificationOutcome = null;
+      _identificationError = null;
+      _mode = _CaptureMode.liveCamera;
+    });
+  }
+
+  void _cancelIdentification() {
+    _identificationRunId += 1;
     setState(() {
       _pendingCapture = null;
+      _identificationOutcome = null;
+      _identificationError = null;
+      _mode = _CaptureMode.overview;
+    });
+  }
+
+  void _returnToOverview() {
+    _identificationRunId += 1;
+    setState(() {
+      _pendingCapture = null;
+      _identificationOutcome = null;
+      _identificationError = null;
       _mode = _CaptureMode.overview;
     });
   }
