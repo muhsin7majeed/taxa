@@ -30,4 +30,28 @@ void main() {
       isFalse,
     );
   });
+
+  test('converts flat model values into a batched tensor', () {
+    const spec = ModelInputSpec(width: 2, height: 1, channels: 3);
+    final tensor = ModelInputTensor(
+      spec: spec,
+      values: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+    );
+
+    expect(tensor.toBatchedTensor(), [
+      [
+        [
+          [0, 0.1, 0.2],
+          [0.3, 0.4, 0.5],
+        ],
+      ],
+    ]);
+  });
+
+  test('rejects batched tensor conversion for malformed values', () {
+    const spec = ModelInputSpec(width: 2, height: 1, channels: 3);
+    final tensor = ModelInputTensor(spec: spec, values: [0, 0.1]);
+
+    expect(tensor.toBatchedTensor, throwsStateError);
+  });
 }

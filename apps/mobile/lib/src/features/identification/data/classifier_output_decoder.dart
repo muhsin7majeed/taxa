@@ -1,6 +1,5 @@
 import '../domain/classifier_label_map.dart';
 import '../domain/image_classifier.dart';
-import 'tflite_image_classifier.dart';
 
 class ClassifierOutputDecoder {
   const ClassifierOutputDecoder();
@@ -22,7 +21,12 @@ class ClassifierOutputDecoder {
       }
 
       predictions.add(
-        predictionFromLabel(label: label, confidence: scores[index]),
+        ImageClassifierPrediction(
+          taxonomyEntryId: label.taxonomyEntryId,
+          scientificName: label.scientificName,
+          commonName: label.commonName,
+          confidence: scores[index],
+        ),
       );
     }
 
