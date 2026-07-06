@@ -1,0 +1,53 @@
+{
+  "version": "fake-local-catalog-v1",
+  "labels": [
+    {
+      "index": 0,
+      "taxonomyEntryId": "bd9ac930-1581-49df-a7d8-462ab9f055db",
+      "scientificName": "Turdus migratorius",
+      "commonName": "American Robin"
+    },
+    {
+      "index": 1,
+      "taxonomyEntryId": "ea34afce-220e-4863-9f90-cbb2ae0b9d63",
+      "scientificName": "Passer domesticus",
+      "commonName": "House Sparrow"
+    },
+    {
+      "index": 2,
+      "taxonomyEntryId": "caa69833-82ec-4d21-80fa-90ee170bedc6",
+      "scientificName": "Danaus plexippus",
+      "commonName": "Monarch Butterfly"
+    },
+    {
+      "index": 3,
+      "taxonomyEntryId": "bb04b627-0d34-45f4-aec0-f2525ed94bb8",
+      "scientificName": "Hippodamia convergens",
+      "commonName": "Convergent Lady Beetle"
+    },
+    {
+      "index": 4,
+      "taxonomyEntryId": "fbb2b0bd-6a9b-4bde-9f38-1c8fd83cc940",
+      "scientificName": "Sciurus carolinensis",
+      "commonName": "Eastern Gray Squirrel"
+    },
+    {
+      "index": 5,
+      "taxonomyEntryId": "54f480df-3782-40c7-9575-e476e875fe0f",
+      "scientificName": "Lepomis macrochirus",
+      "commonName": "Bluegill"
+    },
+    {
+      "index": 6,
+      "taxonomyEntryId": "d2a24ad4-7428-4511-a40e-35dc56dec34c",
+      "scientificName": "Lithobates clamitans",
+      "commonName": "Green Frog"
+    },
+    {
+      "index": 7,
+      "taxonomyEntryId": "8e4044a4-3c76-4545-b933-99cb7f7408ca",
+      "scientificName": "Cyprinus carpio",
+      "commonName": "Common Carp"
+    }
+  ]
+}
