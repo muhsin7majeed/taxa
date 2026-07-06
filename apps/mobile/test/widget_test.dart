@@ -55,11 +55,15 @@ void main() {
     expect(find.text('Camera module ready'), findsOneWidget);
 
     await tester.tap(find.text('Collection'));
+    await tester.pump();
+    expect(find.text('Ready for capture'), findsNothing);
     await pumpUntilFound(tester, find.text('Species collection'));
     expect(find.text('Species collection'), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
 
     await tester.tap(find.text('Checklists'));
+    await tester.pump();
+    expect(find.text('Species collection'), findsNothing);
     await pumpUntilFound(tester, find.text('Field checklists'));
     expect(find.text('Field checklists'), findsOneWidget);
     expect(find.text('0 / 5'), findsOneWidget);

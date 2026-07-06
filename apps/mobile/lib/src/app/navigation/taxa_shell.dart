@@ -47,6 +47,10 @@ class TaxaShell extends ConsumerWidget {
         duration: context.taxaReduceMotion ? Duration.zero : motion.quick,
         switchInCurve: motion.entranceCurve,
         switchOutCurve: motion.progressCurve,
+        layoutBuilder: (currentChild, _) {
+          // Navigation should not stack outgoing pages over the selected tab.
+          return currentChild ?? const SizedBox.shrink();
+        },
         transitionBuilder: (child, animation) {
           final offsetAnimation = Tween<Offset>(
             begin: const Offset(0.03, 0),

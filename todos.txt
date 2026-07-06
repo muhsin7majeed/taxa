@@ -1,1 +1,1 @@
-- There's a content overlay effect when switching between tabs. Like previous tab content will be visible for a split second.
+- [x] Fixed tab-switch content overlay by rendering only the selected tab during shell navigation.
