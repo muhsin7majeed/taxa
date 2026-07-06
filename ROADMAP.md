@@ -2,9 +2,9 @@
 
 ## Current Status
 
-Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, Phase 2D local-first data foundation, and Milestone 3 camera capture vertical slice are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, upgraded placeholder screens backed by local data, a live in-app camera screen, captured-image preview, camera-only guardrails, local capture-attempt persistence, and the first fake-classifier identification slice.
+Phase 1 repository foundation, Phase 2B mobile shell work, Phase 2C theme/motion/design foundation, Phase 2D local-first data foundation, and Milestone 3 camera capture vertical slice are complete. The Flutter app now has a Riverpod bootstrap, scalable theme preset state, Taxa-specific theme extensions, a field-guide visual direction, reusable UI primitives, transform-based shell motion, Drift/SQLite local persistence, a seeded fake taxonomy catalog, upgraded placeholder screens backed by local data, a live in-app camera screen, captured-image preview, camera-only guardrails, local capture-attempt persistence, the first fake-classifier identification slice, and typed model asset configuration for the future on-device classifier.
 
-The next implementation focus is extending Milestone 4 from the fake classifier slice toward the real on-device model boundary: TFLite integration behind `ImageClassifier`, isolate-backed preprocessing/inference, benchmark tooling, and physical Android validation. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
+The next implementation focus is extending Milestone 4 from the fake classifier slice toward real on-device inference: TFLite integration behind `ImageClassifier`, isolate-backed preprocessing/inference, benchmark tooling, and physical Android validation. Backend, auth, cloud backup, and cross-device sync remain deferred until the offline loop is valuable.
 
 ## Research Notes And Recommendations
 
@@ -95,6 +95,7 @@ The next implementation focus is extending Milestone 4 from the fake classifier 
 - [x] Build processing/loading screen with cancellable workflow.
 - [x] Implement confidence-threshold routing: discovery success vs unidentified.
 - [x] Store identification attempt, model version, top-k predictions, and result state.
+- [x] Add typed model asset configuration for the future real classifier.
 - [ ] Add real `tflite_flutter` classifier behind the interface.
 - [ ] Move preprocessing/inference off the UI isolate.
 - [ ] Add a local benchmark/debug screen for latency and delegate behavior.

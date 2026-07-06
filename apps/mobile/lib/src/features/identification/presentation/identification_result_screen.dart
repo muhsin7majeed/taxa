@@ -89,16 +89,12 @@ class IdentificationResultScreen extends StatelessWidget {
           title: 'Species identified',
           subtitle: 'A local discovery was added to your field record.',
         ),
-        FeatureStatusPanel(
-          icon: Icons.auto_awesome_outlined,
-          eyebrow: taxonomy.rarity,
-          title: taxonomy.commonName,
-          body: taxonomy.scientificName,
-          action: FilledButton.icon(
-            onPressed: onCaptureAgain,
-            icon: const Icon(Icons.photo_camera_outlined),
-            label: const Text('Capture another'),
-          ),
+        _DiscoveryResultCard(
+          commonName: taxonomy.commonName,
+          scientificName: taxonomy.scientificName,
+          rarity: taxonomy.rarity,
+          confidence: confidence,
+          onCaptureAgain: onCaptureAgain,
         ),
         Row(
           children: [
@@ -181,6 +177,137 @@ class _ResultActions extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DiscoveryResultCard extends StatelessWidget {
+  const _DiscoveryResultCard({
+    required this.commonName,
+    required this.scientificName,
+    required this.rarity,
+    required this.confidence,
+    required this.onCaptureAgain,
+  });
+
+  final String commonName;
+  final String scientificName;
+  final String rarity;
+  final double confidence;
+  final VoidCallback onCaptureAgain;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.taxaColors;
+    final spacing = context.taxaSpacing;
+    final radii = context.taxaRadii;
+    final textTheme = Theme.of(context).textTheme;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.96, end: 1),
+      duration: context.taxaReduceMotion
+          ? Duration.zero
+          : context.taxaMotion.emphasized,
+      curve: context.taxaMotion.unlockCurve,
+      builder: (context, scale, child) {
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: Container(
+        padding: EdgeInsets.all(spacing.lg),
+        decoration: BoxDecoration(
+          color: colors.discovery,
+          borderRadius: BorderRadius.circular(radii.lg),
+          border: Border.all(color: colors.specimenBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.auto_awesome_outlined,
+                  color: colors.onDiscovery,
+                  size: 28,
+                ),
+                SizedBox(width: spacing.md),
+                Expanded(
+                  child: Text(
+                    'Discovery unlocked',
+                    style: textTheme.labelLarge?.copyWith(
+                      color: colors.onDiscovery,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                _RarityBadge(rarity: rarity),
+              ],
+            ),
+            SizedBox(height: spacing.lg),
+            Text(
+              commonName,
+              style: textTheme.headlineSmall?.copyWith(
+                color: colors.onDiscovery,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              scientificName,
+              style: textTheme.bodyMedium?.copyWith(color: colors.onDiscovery),
+            ),
+            SizedBox(height: spacing.lg),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${(confidence * 100).round()}% confidence',
+                    style: textTheme.titleSmall?.copyWith(
+                      color: colors.onDiscovery,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                FilledButton.icon(
+                  onPressed: onCaptureAgain,
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  label: const Text('Again'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RarityBadge extends StatelessWidget {
+  const _RarityBadge({required this.rarity});
+
+  final String rarity;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.taxaColors;
+    final spacing = context.taxaSpacing;
+    final radii = context.taxaRadii;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.sm,
+        vertical: spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.onDiscovery,
+        borderRadius: BorderRadius.circular(radii.sm),
+      ),
+      child: Text(
+        rarity,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: colors.discovery,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 }

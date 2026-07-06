@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../collection/data/local_catalog_providers.dart';
+import '../domain/classifier_model_config.dart';
 import '../domain/identification_decision.dart';
 import '../domain/image_classifier.dart';
 import 'identification_attempt_repository.dart';
@@ -10,8 +11,12 @@ final imageClassifierProvider = Provider<ImageClassifier>((ref) {
   return const FakeImageClassifier();
 });
 
+final classifierModelConfigProvider = Provider<ClassifierModelConfig>((ref) {
+  return ClassifierModelConfig.mvpPlaceholder();
+});
+
 final confidenceThresholdProvider = Provider<double>((ref) {
-  return 0.65;
+  return ref.watch(classifierModelConfigProvider).threshold;
 });
 
 final confidenceThresholdPolicyProvider = Provider<ConfidenceThresholdPolicy>((
