@@ -30,15 +30,25 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
           ),
           FeatureStatusPanel(
             icon: Icons.memory_outlined,
-            eyebrow: 'Model boundary',
+            eyebrow: 'Active classifier',
             title: config.modelVersion,
             body:
-                '${config.inputSize}px input, ${_delegateLabel(config)} runtime preference.',
-            action: FilledButton.icon(
-              onPressed: () => ref.invalidate(classifierBenchmarkProvider),
-              icon: const Icon(Icons.speed_outlined),
-              label: const Text('Run benchmark'),
-            ),
+                'Fake classifier remains active until a real model asset is available.',
+            action: switch (benchmark) {
+              AsyncLoading() => FilledButton.icon(
+                onPressed: null,
+                icon: const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                label: const Text('Running'),
+              ),
+              _ => FilledButton.icon(
+                onPressed: () => ref.invalidate(classifierBenchmarkProvider),
+                icon: const Icon(Icons.speed_outlined),
+                label: const Text('Run benchmark'),
+              ),
+            },
           ),
           Row(
             children: [
@@ -58,6 +68,12 @@ class ClassifierDiagnosticsScreen extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+          const TaxaInfoTile(
+            icon: Icons.info_outline,
+            title: 'Current benchmark uses fake classifier',
+            subtitle:
+                'The timing below measures simulated analysis latency, not real TFLite inference yet.',
           ),
           TaxaInfoTile(
             icon: Icons.label_outline,
@@ -135,14 +151,14 @@ class _BenchmarkSummaryPanel extends StatelessWidget {
           title: prediction?.commonName ?? 'No top prediction',
           subtitle: prediction == null
               ? 'The classifier did not return top-k output.'
-              : '${_formatPercent(prediction.confidence)} confidence, ${summary.modelVersion}',
+              : '${_formatPercent(prediction.confidence)} confidence, ${summary.runtimeLabel}',
         ),
         SizedBox(height: context.taxaSpacing.md),
         TaxaInfoTile(
           icon: Icons.speed_outlined,
           title:
               'Fastest ${_formatDuration(summary.fastestLatency)} / slowest ${_formatDuration(summary.slowestLatency)}',
-          subtitle: 'Last run ${summary.ranAt.toLocal()}',
+          subtitle: 'Last run ${_formatLocalTime(summary.ranAt)}',
         ),
       ],
     );
@@ -158,5 +174,14 @@ class _BenchmarkSummaryPanel extends StatelessWidget {
 
   String _formatPercent(double value) {
     return '${(value * 100).round()}%';
+  }
+
+  String _formatLocalTime(DateTime value) {
+    final local = value.toLocal();
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    final second = local.second.toString().padLeft(2, '0');
+
+    return '$hour:$minute:$second';
   }
 }

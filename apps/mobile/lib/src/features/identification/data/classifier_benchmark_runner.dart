@@ -40,6 +40,7 @@ class ClassifierBenchmarkRunner {
 
     return ClassifierBenchmarkSummary(
       config: config,
+      runtimeLabel: classifier.runtimeType.toString(),
       modelVersion: classification.modelVersion,
       labelMapVersion: classification.labelMapVersion,
       iterations: iterations,

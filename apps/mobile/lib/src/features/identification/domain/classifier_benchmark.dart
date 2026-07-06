@@ -4,6 +4,7 @@ import 'image_classifier.dart';
 class ClassifierBenchmarkSummary {
   const ClassifierBenchmarkSummary({
     required this.config,
+    required this.runtimeLabel,
     required this.modelVersion,
     required this.labelMapVersion,
     required this.iterations,
@@ -15,6 +16,7 @@ class ClassifierBenchmarkSummary {
   });
 
   final ClassifierModelConfig config;
+  final String runtimeLabel;
   final String modelVersion;
   final String labelMapVersion;
   final int iterations;

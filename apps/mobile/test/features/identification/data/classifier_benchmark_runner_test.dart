@@ -15,6 +15,7 @@ void main() {
       final summary = await runner.run(iterations: 2);
 
       expect(summary.iterations, 2);
+      expect(summary.runtimeLabel, 'FakeImageClassifier');
       expect(summary.modelVersion, FakeImageClassifier.modelVersion);
       expect(summary.labelMapVersion, summary.config.labelMapVersion);
       expect(summary.averageLatency.inMicroseconds, greaterThanOrEqualTo(0));
